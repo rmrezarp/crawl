@@ -11,7 +11,7 @@ import re
 import pandas as pd
 sys.path.append(os.path.abspath("E:/RM/besoklibur/python/crawl/source/social media/"))
 from manipulate_data import *
-from get_instagram_base import *
+from get_instagram import *
 
 #database = pd.read_csv("E:/RM/besoklibur/database_03122017.csv", sep="`")
 

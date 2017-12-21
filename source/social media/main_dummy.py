@@ -11,7 +11,7 @@ import re
 import pandas as pd
 sys.path.append(os.path.abspath("E:/RM/besoklibur/python/crawl/source/social media/"))
 from manipulate_data import *
-from get_instagram_base import *
+from get_instagram import *
 
 #database = pd.read_csv("E:/RM/besoklibur/database_03122017.csv", sep="`")
 database = pd.read_csv("E:/RM/besoklibur/sample.csv", sep="`")
@@ -71,7 +71,7 @@ def get_profile(df):
     for row in df.itertuples():
         print("No. of profile : {}".format(count))
         dftemp1 = visit_profile(row.users)
-        dftemp2 = fetch_phones(dftemp1.biography[0])
+        dftemp2 = fetch_bio(dftemp1.biography[0])
         dffinal1 = append_list_df(dffinal1,dftemp1)
         dffinal2 = append_list_df(dffinal2,dftemp2)
         count+=1
