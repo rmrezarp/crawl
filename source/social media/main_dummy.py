@@ -9,7 +9,7 @@ import sys
 import os
 import re
 import pandas as pd
-sys.path.append(os.path.abspath("E:/RM/besoklibur/python/code/"))
+sys.path.append(os.path.abspath("E:/RM/besoklibur/python/crawl/source/social media/"))
 from manipulate_data import *
 from get_instagram_base import *
 
