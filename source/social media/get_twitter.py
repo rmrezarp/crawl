@@ -16,7 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.by import By
-from Crypto.Cipher import AES
+#from Crypto.Cipher import AES
 import base64
 import time
 import datetime
@@ -58,7 +58,7 @@ def start_phantomjs():
 
 def init_df(outfile,column):
     my_file = Path(outfile)
-    if outfile != "" or my_file.exists():
+    if outfile != "" and my_file.exists():
         dffinal = pd.read_csv(outfile, sep="`")
     else:
         dffinal = pd.DataFrame(columns=column)
@@ -82,9 +82,7 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
     keys = None
     tweets = ""
     keyword = ""
-    outfileurl = "E:/RM/besoklibur/database_twitter.csv"
     column = ['tweetid', 'userid', 'twitterscreenname', 'twitterfullname', 'tweets', 'datetimetweets', 'tweetdatetext', 'tweetdatetime','keyword','outfilelink','hashtag']
-    dffinal = init_df(outfileurl,column)
     dftemp = pd.DataFrame()
     first = 0
     last = 1
@@ -214,7 +212,7 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
     #        passw.send_keys(password)
     
     
-    def __init__(self, browser):
+    def __init__(self, browser,outfileurl):
         if browser.lower() == "ie":
             webdriver.Ie.__init__(self)
         elif browser.lower() == "chrome":
@@ -225,12 +223,22 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
             options = Options()
             options.add_argument("--disable-extensions")
             options.add_argument("--disable-notifications")
-            #options.add_argument("--headless")
+            options.add_argument("--headless")
             options.add_argument("--disable-gpu")            
             options.add_argument("--start-maximized");
             options.add_experimental_option("prefs",prefs)
+            self.dffinal = init_df(outfileurl,self.column)
 
             webdriver.Chrome.__init__(self,executable_path=chromedriver, chrome_options=options)
+        elif browser.lower() == "phantom":
+            phantomjs_path = "C:/PhantomJS/bin/phantomjs.exe"
+            desired_capabilities = DesiredCapabilities.PHANTOMJS.copy()
+            desired_capabilities['phantomjs.page.customHeaders.User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) ' \
+                                                                          'AppleWebKit/537.36 (KHTML, like Gecko) ' \
+                                                                          'Chrome/39.0.2171.95 Safari/537.36'
+            self.dffinal = init_df(outfileurl,self.column)        
+            webdriver.PhantomJS.__init__(self,executable_path=phantomjs_path,desired_capabilities=desired_capabilities, service_args=['--ignore-ssl-errors=true'], service_log_path=os.path.devnull)
+           
         else:
             webdriver.Firefox.__init__(self)
    

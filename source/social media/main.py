@@ -12,6 +12,7 @@ import pandas as pd
 sys.path.append(os.path.abspath("E:/RM/besoklibur/python/crawl/source/social media/"))
 from manipulate_data import *
 from get_instagram import *
+from get_twitter import *
 
 #database = pd.read_csv("E:/RM/besoklibur/database_03122017.csv", sep="`")
 
@@ -43,8 +44,49 @@ def crawl():
 
     print("Done for crawling")
     start_menu()
-    
 
+
+def twitter():    
+    browser = input(
+"""Type browser from list: 
+a. Chrome
+b. Phantom
+
+Type its name : """)
+    keyword = input('Enter a keyword: ')
+    outfileurl = "E:/RM/besoklibur/database_twitter.csv"
+    dataf = myPage(browser,outfileurl)
+    if not dataf.dffinal.empty:
+        dataf.dfpause = get_last_row(dataf.dffinal)
+    
+    dffinal = dataf.dffinal
+    dataf.search('twitter',keyword)
+    
+    
+    while(True):
+        print(dataf.flagdone)
+        if not dataf.flagdone:
+            datafin = dataf.scrape()
+            dataf.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+            time.sleep(10) 
+            test = dataf.execute_script("if($(window).scrollTop() + $(window).height() == $(document).height()) {return true;} else {return false;}")
+            print("hei {}".format(test))
+            if test:
+                print("already on bottom page")
+                break;
+        else:
+            print("nothing to crawl")
+            break;
+    dffinal.userid = pd.to_numeric(dffinal.userid, errors='coerce').fillna(0).astype(np.int64)    
+    dffinal.tweetid = pd.to_numeric(dffinal.tweetid, errors='coerce').fillna(0).astype(np.int64)    
+    dffinal = dffinal.append(datafin, ignore_index=True)
+        
+    outfileurl = "E:/RM/besoklibur/database_twitter.csv"  
+    dffinal.to_csv(outfileurl, sep='`', encoding='utf-8', index=False)
+    start_menu()
+
+    
+    
 def even():
     print("n is an even number\n")
 
@@ -62,6 +104,7 @@ def quits():
 options = {'crawl' : crawl,
            'back' : start_menu,
            'quit' : quits,
+           'twitter' : twitter,
            1 : zero,
            2 : even,
            3 : prime,
