@@ -110,10 +110,11 @@ def crawl_stop(dfcrawl,dfpause,field,keyword):
     
 #    print("{} {}".format(dfcrawl[field], type(dfcrawl[field])))
 #    print("{} {}".format(dfpause[field], type(dfpause[field])))
-    
+#    print("{} & {}".format(dfpause['keyword'],keyword))
+#    
     
     if str(dfcrawl[field]) <= str(dfpause[field]) and dfpause['keyword'] == keyword:
-        print('sama')
+#        print('sama')
         return True
     else:
 #        print('beda')
