@@ -26,8 +26,7 @@ def zero():
 def crawl():
     keyword = input('Enter a keyword: ')
     
-    database = pd.read_csv("E:/RM/besoklibur/database_03122017_new.csv", sep="`", dtype={'postid': 'str', 'userid' : 'str'})
-    
+    database = pd.read_csv("E:/RM/besoklibur/database_03122017_new.csv", sep="`")
     old = len(database)
     database = instacrawl(database,keyword)
     new = len(database)
@@ -45,6 +44,7 @@ def crawl():
 
     print("Done for crawling")
     start_menu()
+
 
 def twitter():    
     browser = input(
