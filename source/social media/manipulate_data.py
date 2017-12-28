@@ -90,6 +90,7 @@ def clean_carriage(df,colnames):
     df[colnames] = df[colnames].str.replace(r'\r\n', ' ')
     df[colnames] = df[colnames].str.replace(r'\r', ' ')
     df[colnames] = df[colnames].str.replace(r'\n', ' ')
+    df[colnames] = df[colnames].str.replace(r'`', ' ')
     return df
 
 def make_temp_df(lists):
@@ -108,10 +109,10 @@ def get_last_row(df):
 
 def crawl_stop(dfcrawl,dfpause,field,keyword):
     
-#    print("{} {}".format(dfcrawl[field], type(dfcrawl[field])))
-#    print("{} {}".format(dfpause[field], type(dfpause[field])))
-#    print("{} & {}".format(dfpause['keyword'],keyword))
-#    
+    print("{} {}".format(dfcrawl[field], type(dfcrawl[field])))
+    print("{} {}".format(dfpause[field], type(dfpause[field])))
+    print("{} & {}".format(dfpause['keyword'],keyword))
+    
     
     if str(dfcrawl[field]) <= str(dfpause[field]) and dfpause['keyword'] == keyword:
 #        print('sama')

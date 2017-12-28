@@ -283,10 +283,11 @@ def get_comments(id_owner, code_post,count_comments,id_fetchcomment):
 
 
 def instacrawl(dffinal,tag):
-    dfpause = get_first_row(dffinal)
+    dfpause = get_last_row(dffinal)
+#    print(dfpause)
     dftemp = get_explore_post(dfpause,tag,id_fetchexplore,False,10)
+    dftemp = dftemp.sort_values(by='posttimestamp', ascending=True)
     dffinal = dffinal.append(dftemp)
-    dffinal = dffinal.sort_values(by='posttimestamp', ascending=False)
     return dffinal
 
 #opentrip5[opentrip5['linkpost']=="BcCgwzTDuqO"]
