@@ -100,20 +100,27 @@ def append_list_df(df, lists):
     df = df.append(lists, ignore_index=True)
     return df
 
-def get_first_row(df):
-    return df.iloc[0]
+def get_first_row(df, keyword):
+    df_group = df.groupby('keyword').first()
+    df_group.reset_index(level=0, inplace=True)
+    dx = df_group[df_group['keyword'] == keyword]
+    return dx.iloc[0]
 
-def get_last_row(df):
-    return df.iloc[-1]
+def get_last_row(df, keyword):
+    df_group = df.groupby('keyword').last()
+    df_group.reset_index(level=0, inplace=True)
+    dx = df_group[df_group['keyword'] == keyword]
+    return dx.iloc[0]
 
 def crawl_stop(dfcrawl,dfpause,field,keyword):
     
-#    print("{} {}".format(dfcrawl[field], type(dfcrawl[field])))
-#    print("{} {}".format(dfpause[field], type(dfpause[field])))
-#    print("{} & {}".format(dfpause['keyword'],keyword))
+    print("{} {}".format(dfcrawl[field], type(dfcrawl[field])))
+    print("{} {}".format(dfpause[field], type(dfpause[field])))
+    print("{} & {}".format(dfpause['keyword'],keyword))
 #    
     
-    if str(dfcrawl[field]) <= str(dfpause[field]) and dfpause['keyword'] == keyword:
+    if str(dfcrawl[field]) <= str(dfpause[field]):
+    #and dfpause['keyword'] == keyword:
 #        print('sama')
         return True
     else:
