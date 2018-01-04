@@ -85,11 +85,14 @@ def get_json(url,setname):
         break
     return response
 
-
 def clean_carriage(df,colnames):
     df[colnames] = df[colnames].str.replace(r'\r\n', ' ')
     df[colnames] = df[colnames].str.replace(r'\r', ' ')
     df[colnames] = df[colnames].str.replace(r'\n', ' ')
+    df[colnames] = df[colnames].str.replace(r'\n', ' ')
+    df[colnames] = df[colnames].str.replace(r'`', ' ')
+    df[colnames] = df[colnames].str.replace(r'\s+', ' ', regex=True)
+    
     return df
 
 def make_temp_df(lists):
