@@ -172,28 +172,50 @@ def iterate_explore_post(jsonposts, dffinal,dfpause,keyword):
     dftemp = pd.DataFrame()
     rows = jsonposts['data']['hashtag']['edge_hashtag_to_media']
     flagdone = False
-    for row in rows['edges']:
-        postlink = row['node']['shortcode']
-        dfrow =  get_data_from_post(postlink)
-        
-#        postid = row['node']['id']
-#        postlink = row['node']['shortcode']
-#        ownerid = row['node']['owner']['id']
-#        ownername = get_username_from_post(postlink)
-#        posttimestamp = row['node']['taken_at_timestamp']
-#        posttimestamp = time.strftime("%D %H:%M:%S", time.localtime(int(posttimestamp)))
-#        countlikes = row['node']['edge_liked_by']['count']
-#        countcomments = row['node']['edge_media_to_comment']['count']
-#
-#        dfrow = []
-#        dfrow.append({'idowner' : str(ownerid), 'nameowner' : str(ownername),'idpost' : str(postid), 'linkpost': str(postlink), 'timestamp': str(posttimestamp), 'likescount' : str(countlikes), 'commentscount' : str(countcomments) })
-        if crawl_stop(dfrow,dfpause,"postid",keyword):
-            flagdone = True
-            break
-        else: 
+
+    if dfpause.empty:
+        for row in rows['edges']:
+            postlink = row['node']['shortcode']
+            dfrow =  get_data_from_post(postlink)
+            
+    #        postid = row['node']['id']
+    #        postlink = row['node']['shortcode']
+    #        ownerid = row['node']['owner']['id']
+    #        ownername = get_username_from_post(postlink)
+    #        posttimestamp = row['node']['taken_at_timestamp']
+    #        posttimestamp = time.strftime("%D %H:%M:%S", time.localtime(int(posttimestamp)))
+    #        countlikes = row['node']['edge_liked_by']['count']
+    #        countcomments = row['node']['edge_media_to_comment']['count']
+    #
+    #        dfrow = []
+    #        dfrow.append({'idowner' : str(ownerid), 'nameowner' : str(ownername),'idpost' : str(postid), 'linkpost': str(postlink), 'timestamp': str(posttimestamp), 'likescount' : str(countlikes), 'commentscount' : str(countcomments) })
             dftemp = append_list_df(dftemp, dfrow)
-#            print("panjang dftemp = {}".format(len(dftemp)))
-            continue
+    #            print("panjang dftemp = {}".format(len(dftemp)))
+        flagdone = True
+
+    else:    
+        for row in rows['edges']:
+            postlink = row['node']['shortcode']
+            dfrow =  get_data_from_post(postlink)
+            
+    #        postid = row['node']['id']
+    #        postlink = row['node']['shortcode']
+    #        ownerid = row['node']['owner']['id']
+    #        ownername = get_username_from_post(postlink)
+    #        posttimestamp = row['node']['taken_at_timestamp']
+    #        posttimestamp = time.strftime("%D %H:%M:%S", time.localtime(int(posttimestamp)))
+    #        countlikes = row['node']['edge_liked_by']['count']
+    #        countcomments = row['node']['edge_media_to_comment']['count']
+    #
+    #        dfrow = []
+    #        dfrow.append({'idowner' : str(ownerid), 'nameowner' : str(ownername),'idpost' : str(postid), 'linkpost': str(postlink), 'timestamp': str(posttimestamp), 'likescount' : str(countlikes), 'commentscount' : str(countcomments) })
+            if crawl_stop(dfrow,dfpause,"postid",keyword):
+                flagdone = True
+                break
+            else: 
+                dftemp = append_list_df(dftemp, dfrow)
+    #            print("panjang dftemp = {}".format(len(dftemp)))
+                continue
 
     dffinal = dffinal.append(dftemp)
 #    print("panjang df = {}".format(len(dffinal)))
@@ -283,10 +305,10 @@ def get_comments(id_owner, code_post,count_comments,id_fetchcomment):
 
 
 def instacrawl(dffinal,tag):
-    dfpause = get_first_row(dffinal)
+    dfpause = get_last_row(dffinal,tag)
     dftemp = get_explore_post(dfpause,tag,id_fetchexplore,False,10)
+    dftemp = dftemp.sort_values(by='posttimestamp', ascending=True)
     dffinal = dffinal.append(dftemp)
-    dffinal = dffinal.sort_values(by='posttimestamp', ascending=False)
     return dffinal
 
 #opentrip5[opentrip5['linkpost']=="BcCgwzTDuqO"]
