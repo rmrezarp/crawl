@@ -91,7 +91,7 @@ def clean_carriage(df,colnames):
     df[colnames] = df[colnames].str.replace(r'\n', ' ')
     df[colnames] = df[colnames].str.replace(r'\n', ' ')
     df[colnames] = df[colnames].str.replace(r'`', ' ')
-    df[colnames] = df[colnames].str.replace(r'\s+', ' ', regex=True)
+    df[colnames] = df[colnames].str.replace(r'\s+', ' ')
     
     return df
 
