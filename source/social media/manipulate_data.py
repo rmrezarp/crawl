@@ -85,14 +85,54 @@ def get_json(url,setname):
         break
     return response
 
-def clean_carriage(df,colnames):
-    df[colnames] = df[colnames].str.replace(r'\r\n', ' ')
-    df[colnames] = df[colnames].str.replace(r'\r', ' ')
-    df[colnames] = df[colnames].str.replace(r'\n', ' ')
-    df[colnames] = df[colnames].str.replace(r'\n', ' ')
-    df[colnames] = df[colnames].str.replace(r'`', ' ')
-    df[colnames] = df[colnames].str.replace(r'\s+', ' ')
+def clean_carriage(strings):
+    strings = re.sub('\r\n',' ', strings)
+    strings = re.sub('\r',' ', strings)
+    strings = re.sub('\n',' ', strings)
+    strings = re.sub('`',' ', strings)
+    strings = re.sub('\s+',' ', strings)
+    return strings
+
+def clean_carriage_string(df,colnames):
+#    df[colnames] = df[colnames].replace(to_replace='\r\n', value=' ', regex=True)
+#    df[colnames] = df[colnames].replace(to_replace='\r', value=' ', regex=True)
+#    df[colnames] = df[colnames].replace(to_replace='\n', value=' ', regex=True)
+#    df[colnames] = df[colnames].replace(to_replace='`', value=' ', regex=True)
+#    df[colnames] = df[colnames].replace(to_replace='\s+', value=' ', regex=True)
+
+#    df[colnames] = df[colnames].replace({'\r\n':' '}, regex=True)
+#    df[colnames] = df[colnames].replace({'\r':' '}, regex=True)
+#    df[colnames] = df[colnames].replace({'\n':' '}, regex=True)
+#    df[colnames] = df[colnames].replace({'`':' '}, regex=True)
+#    df[colnames] = df[colnames].replace({'\s+':' '}, regex=True)
+#
+
+#    df[colnames] = df[colnames].replace('\r\n',' ')
+#    df[colnames] = df[colnames].replace('\r',' ')
+#    df[colnames] = df[colnames].replace('\n',' ')
+#    df[colnames] = df[colnames].replace('`',' ')
+#    df[colnames] = df[colnames].replace('\s+',' ')
     
+    df[colnames] = re.sub('\r\n',' ', df[colnames])
+    df[colnames] = re.sub('\r',' ', df[colnames])
+    df[colnames] = re.sub('\n',' ', df[colnames])
+    df[colnames] = re.sub('`',' ', df[colnames])
+    df[colnames] = re.sub('\s+',' ', df[colnames])
+    return df
+
+def clean_carriage_df(df,colnames):
+    df[colnames] = df[colnames].replace(to_replace='\r\n', value=' ', regex=True)
+    df[colnames] = df[colnames].replace(to_replace='\r', value=' ', regex=True)
+    df[colnames] = df[colnames].replace(to_replace='\n', value=' ', regex=True)
+    df[colnames] = df[colnames].replace(to_replace='`', value=' ', regex=True)
+    df[colnames] = df[colnames].replace(to_replace='\s+', value=' ', regex=True)
+
+    df[colnames] = df[colnames].replace({'\r\n':' '}, regex=True)
+    df[colnames] = df[colnames].replace({'\r':' '}, regex=True)
+    df[colnames] = df[colnames].replace({'\n':' '}, regex=True)
+    df[colnames] = df[colnames].replace({'`':' '}, regex=True)
+    df[colnames] = df[colnames].replace({'\s+':' '}, regex=True)
+
     return df
 
 def make_temp_df(lists):
@@ -227,3 +267,10 @@ def get_phones(df):
 #    dffinal = dffinal.rename(columns={0: 'words'})
 #    dffinal = count_tags(dffinal,"words")
     return dffinal
+
+
+def normalize_text(text):
+    result = text.lower() #lower the text even unicode given
+    result = re.sub(r'[^a-z0-9 -]', ' ', result, flags = re.IGNORECASE|re.MULTILINE)
+    result = re.sub(r'( +)', ' ', result, flags = re.IGNORECASE|re.MULTILINE)
+    return result

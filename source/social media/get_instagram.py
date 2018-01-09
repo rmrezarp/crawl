@@ -151,14 +151,17 @@ def get_data_from_post(link):
     dfrow['username']        = row['owner']['username']
     dfrow['userfullname']       = row['owner']['full_name']
     dfrow['userid']       = row['owner']['id']
-    dfrow['description']      = row['edge_media_to_caption']['edges'][0]['node']['text'] if check_json("values",row['edge_media_to_caption']['edges'],"") else np.NaN
+    dfrow['description']      = clean_carriage(row['edge_media_to_caption']['edges'][0]['node']['text']) if check_json("values",row['edge_media_to_caption']['edges'],"") else np.NaN
     dfrow['countlikes']      = row['edge_media_preview_like']['count']
     dfrow['countcomments']   = row['edge_media_to_comment']['count']
     dfrow['posttimestamp']   = time.strftime("%D %H:%M:%S", time.localtime(int(row['taken_at_timestamp'])))
     dfrow['postlink']        = row['shortcode']
     dfrow['postid']          = row['id']
     
-    dfrow = clean_carriage(dfrow,'description')
+        
+#    dfrow = clean_carriage_string(dfrow,'description')
+#    dfrow = clean_carriage_string(dfrow,'username')
+#    dfrow = clean_carriage_string(dfrow,'userfullname')
     
     return dfrow
 
