@@ -7,6 +7,7 @@ Created on Sat Dec  2 19:13:51 2017
 
 import sys
 import os
+import os.path
 import urllib
 import html
 import datetime
@@ -22,6 +23,14 @@ import re
 sys.path.append(os.path.abspath("E:/RM/besoklibur/python/crawl/source/social media/"))
 from requests.exceptions import ConnectionError
 #from get_instagram_base import *
+
+def df_open(outfileurl):
+    if os.path.exists(outfileurl):        
+        df = pd.read_csv(outfileurl, sep="`")
+    else:
+        df = pd.DataFrame()
+
+    return df
 
 def check_json(case,json,strings):
     if case == "key":
@@ -46,7 +55,7 @@ def get_json(url,setname):
             continue
         
         except requests.exceptions.RequestException as e:
-            print("request exception, tries : {}".format(tries))
+            print("request exception / not connected to wifi, tries : {}".format(tries))
             tries+=1
             continue
 
@@ -153,12 +162,15 @@ def get_last_row(df, keyword):
     df_group = df.groupby('keyword').last()
     df_group.reset_index(level=0, inplace=True)
     dx = df_group[df_group['keyword'] == keyword]
-    return dx.iloc[0]
+    if dx.empty:
+        return dx        
+    else:
+        return dx.iloc[0]
 
 def crawl_stop(dfcrawl,dfpause,field,keyword):
     
-    print("{} {}".format(dfcrawl[field], type(dfcrawl[field])))
-    print("{} {}".format(dfpause[field], type(dfpause[field])))
+    print("crawl {} {}".format(dfcrawl[field], type(dfcrawl[field])))
+    print("pause {} {}".format(dfpause[field], type(dfpause[field])))
     print("{} & {}".format(dfpause['keyword'],keyword))
 #    
     
