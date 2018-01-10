@@ -57,8 +57,7 @@ def start_phantomjs():
     return driver
 
 def init_df(outfile,column):
-    my_file = Path(outfile)
-    if outfile != "" and my_file.exists():
+    if outfile != "" and os.path.exists(outfile):
         dffinal = pd.read_csv(outfile, sep="`")
     else:
         dffinal = pd.DataFrame(columns=column)
@@ -105,49 +104,58 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
             self.html = self.get_page(urlsearch)
             
     def scrape(self):
-        self.html = BeautifulSoup(self.page_source,'html.parser')  
-        tweets = self.html.find_all("li",  {"data-item-type": ["tweet"]})
+       
+        tweets = self.find_elements_by_xpath('//li[@data-item-type="tweet"]')
+        self.first = 1
         self.last = len(tweets)
 #        print("awal first : {}, last : {}".format(self.first,self.last))
         if not self.dfpause.empty:            
-            for counter in range(self.first,self.last):
+            for tweet in tweets:
 #                print("iterasi ke {}".format(counter))
-                dfrow = self.get_tweets(tweets[counter])
+                dfrow = self.get_tweets(tweet)
 #                print(dfrow['tweetid'][0])
 #                print("type = {}, dfpause = {}".format(type(dfpause['tweetid']),dfpause['tweetid']))
 #                print("type = {}, dfrow = {}".format(type(dfrow['tweetid']),dfrow['tweetid']))
                 if crawl_stop(dfrow.iloc[0],self.dfpause,"tweetid",self.keyword):
-                    
                     self.flagdone = True
                     break
                 else: 
                     self.dftemp = append_list_df(self.dftemp,dfrow)
-                self.first = counter + 1
-                print("data number : {}".format(counter))
+                self.first = self.first + 1
+                print("data number : {}".format(self.first))
+                self.dftemp.userid = pd.to_numeric(self.dftemp.userid, errors='coerce').fillna(0).astype(np.int64)    
+                self.dftemp.tweetid = pd.to_numeric(self.dftemp.tweetid, errors='coerce').fillna(0).astype(np.int64)    
+                self.dftemp = self.dftemp.sort_values(by='tweetid', ascending=True)
                     
 
         else:
-            for counter in range(self.first,self.last):
+            for tweet in tweets:
     #            print("iterasi ke {}".format(counter))
-                dfrow = self.get_tweets(tweets[counter])
+                dfrow = self.get_tweets(tweet)
     #            print(dfrow['tweetid'][0])
     #            print("dfpause = {}".format(dfpause['tweetid']))
     #            print("dfrow = {}".format(dfrow['tweetid']))
                 self.dftemp = append_list_df(self.dftemp,dfrow)
             
-                self.first = counter + 1
-                print("data number : {}".format(counter))
+                self.first = self.first + 1
+                print("data number : {}".format(self.first))
+                self.dftemp.userid = pd.to_numeric(self.dftemp.userid, errors='coerce').fillna(0).astype(np.int64)    
+                self.dftemp.tweetid = pd.to_numeric(self.dftemp.tweetid, errors='coerce').fillna(0).astype(np.int64)    
+                self.dftemp = self.dftemp.sort_values(by='tweetid', ascending=True)
 
+                
 #        print("first : {}, last : {}".format(self.first,self.last))
-        self.dftemp.userid = pd.to_numeric(self.dftemp.userid, errors='coerce').fillna(0).astype(np.int64)    
-        self.dftemp.tweetid = pd.to_numeric(self.dftemp.tweetid, errors='coerce').fillna(0).astype(np.int64)    
-        self.dftemp = self.dftemp.sort_values(by='tweetid', ascending=True)
+#        print(self.dftemp)
         return self.dftemp
+            
+            
     
     def get_tweets(self,items):
         dftemp = pd.DataFrame()
         dfrow = make_temp_df(self.column)
-        
+
+        items = items.get_attribute('innerHTML')
+        items = BeautifulSoup(items,'html.parser')  
         datauser = items.find("div", {"class": "tweet"})
         tweet = items.find("p", {"class":"TweetTextSize"})
         tweet = BeautifulSoup(str(tweet),'html.parser')
@@ -162,8 +170,8 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
             test = test.replace(u'\xa0', '')
             links.append(test)
         links = ' '.join(links)
-        dfrow['tweets'] = tweet.get_text()
-        
+        tweets = tweet.get_text()
+        dfrow['tweets'] = clean_carriage(tweets)
         hashtagobj = fetch_hashtags(links)
         outlinkobj = fetch_website(links)
         dfrow['outfilelink'] = outlinkobj
@@ -211,26 +219,36 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
     #        passw = self.driver.find_element_by_xpath('//input[@id="session_password-login"]')
     #        passw.send_keys(password)
     
+    def delete_element(self):
+        self.execute_script("""
+        var element = document.querySelector(".classname");
+        if (element)
+            element.parentNode.removeChild(element);
+        """)
+    
     
     def __init__(self, browser,outfileurl):
         if browser.lower() == "ie":
+            print('ie selected')
             webdriver.Ie.__init__(self)
         elif browser.lower() == "chrome":
+            print('chrome selected')
         #    webdriver.Chrome.__init__(self)
             chromedriver = "E:/RM/python/chromedriver_win32/chromedriver.exe"
             os.environ["webdriver.chrome.driver"] = chromedriver
             prefs = {"profile.managed_default_content_settings.images":2}
             options = Options()
-            options.add_argument("--disable-extensions")
-            options.add_argument("--disable-notifications")
-            options.add_argument("--headless")
-            options.add_argument("--disable-gpu")            
-            options.add_argument("--start-maximized");
+#            options.add_argument("--disable-extensions")
+#            options.add_argument("--disable-notifications")
+#            options.add_argument("--headless")
+#            options.add_argument("--disable-gpu")            
+#            options.add_argument("--start-maximized");
             options.add_experimental_option("prefs",prefs)
             self.dffinal = init_df(outfileurl,self.column)
 
             webdriver.Chrome.__init__(self,executable_path=chromedriver, chrome_options=options)
         elif browser.lower() == "phantom":
+            print('phantom selected')
             phantomjs_path = "C:/PhantomJS/bin/phantomjs.exe"
             desired_capabilities = DesiredCapabilities.PHANTOMJS.copy()
             desired_capabilities['phantomjs.page.customHeaders.User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) ' \
@@ -241,7 +259,49 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
            
         else:
             webdriver.Firefox.__init__(self)
+            print('firefox selected')
    
+
+def tweetcrawl(browser,outfileurl,tag):
+    dataf = myPage(browser,outfileurl)
+    if not dataf.dffinal.empty:
+        dataf.dfpause = get_last_row(dataf.dffinal,tag)    
+    
+    dffinal = dataf.dffinal
+    dataf.search('twitter',tag)
+    
+    while(True):
+#        print(dataf.flagdone)
+        if not dataf.flagdone:
+            datafin = dataf.scrape()
+            dataf.execute_script("""
+                                    var list = document.getElementById("stream-items-id");
+
+                                    while (list.firstChild) {
+                                        //The list is LIVE so it will re-index each call
+                                        list.removeChild(list.firstChild);
+                                    }                     
+                                 """
+                                 )
+            dataf.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+            time.sleep(10) 
+            test = dataf.execute_script("if($(window).scrollTop() + $(window).height() == $(document).height()) {return true;} else {return false;}")
+#            print("hei {}".format(test))
+            if test:
+                print("already on bottom page")
+                break;
+        else:
+            print("nothing to crawl")
+            break;
+    #        counter = counter + 1
+    #        if counter == 2:
+            break
+    dffinal.userid = pd.to_numeric(dffinal.userid, errors='coerce').fillna(0).astype(np.int64)    
+    dffinal.tweetid = pd.to_numeric(dffinal.tweetid, errors='coerce').fillna(0).astype(np.int64)    
+    dffinal = dffinal.append(datafin, ignore_index=True)
+    
+    return dffinal
+
     
 #def tweetcrawl(dffinal,tag):
 #    dfpause = get_first_row(dffinal)
