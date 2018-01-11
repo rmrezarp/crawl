@@ -126,6 +126,7 @@ def get_explore_post(dfpause,tag,id_fetch,hastoken,countpost):
         dffinal['keyword'] = tag
         hasnext = hastoken
         i+=1
+        print(hastoken)
         print(token)
         if token == "DONE":
             return dffinal
@@ -196,7 +197,7 @@ def iterate_explore_post(jsonposts, dffinal,dfpause,keyword):
     #        dfrow.append({'idowner' : str(ownerid), 'nameowner' : str(ownername),'idpost' : str(postid), 'linkpost': str(postlink), 'timestamp': str(posttimestamp), 'likescount' : str(countlikes), 'commentscount' : str(countcomments) })
             dftemp = append_list_df(dftemp, dfrow)
     #            print("panjang dftemp = {}".format(len(dftemp)))
-        flagdone = True
+#        flagdone = True
 
     else:    
         for row in rows['edges']:
