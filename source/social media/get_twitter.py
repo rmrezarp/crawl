@@ -16,6 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 #from Crypto.Cipher import AES
 import base64
 import time
@@ -83,7 +84,7 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
     keyword = ""
     column = ['tweetid', 'userid', 'twitterscreenname', 'twitterfullname', 'tweets', 'datetimetweets', 'tweetdatetext', 'tweetdatetime','keyword','outfilelink','hashtag']
     dftemp = pd.DataFrame()
-    first = 0
+    first = 1
     last = 1
     flagdone = False
     dfpause = pd.DataFrame()
@@ -106,8 +107,6 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
     def scrape(self):
        
         tweets = self.find_elements_by_xpath('//li[@data-item-type="tweet"]')
-        self.first = 1
-        self.last = len(tweets)
 #        print("awal first : {}, last : {}".format(self.first,self.last))
         if not self.dfpause.empty:            
             for tweet in tweets:
@@ -148,8 +147,6 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
 #        print(self.dftemp)
         return self.dftemp
             
-            
-    
     def get_tweets(self,items):
         dftemp = pd.DataFrame()
         dfrow = make_temp_df(self.column)
@@ -238,11 +235,11 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
             os.environ["webdriver.chrome.driver"] = chromedriver
             prefs = {"profile.managed_default_content_settings.images":2}
             options = Options()
-#            options.add_argument("--disable-extensions")
-#            options.add_argument("--disable-notifications")
-#            options.add_argument("--headless")
-#            options.add_argument("--disable-gpu")            
-#            options.add_argument("--start-maximized");
+            options.add_argument("--disable-extensions")
+            options.add_argument("--disable-notifications")
+            options.add_argument("--headless")
+            options.add_argument("--disable-gpu")            
+            options.add_argument("--start-maximized");
             options.add_experimental_option("prefs",prefs)
             self.dffinal = init_df(outfileurl,self.column)
 
@@ -274,6 +271,8 @@ def tweetcrawl(browser,outfileurl,tag):
 #        print(dataf.flagdone)
         if not dataf.flagdone:
             datafin = dataf.scrape()
+
+            dataf.execute_script("window.scrollTo(0,0);")
             dataf.execute_script("""
                                     var list = document.getElementById("stream-items-id");
 
@@ -283,19 +282,19 @@ def tweetcrawl(browser,outfileurl,tag):
                                     }                     
                                  """
                                  )
+            dataf.execute_script("window.scrollTo(0,document.body.scrollHeight/2);")
             dataf.execute_script("window.scrollTo(0,document.body.scrollHeight);")
-            time.sleep(10) 
-            test = dataf.execute_script("if($(window).scrollTop() + $(window).height() == $(document).height()) {return true;} else {return false;}")
-#            print("hei {}".format(test))
-            if test:
-                print("already on bottom page")
-                break;
+            time.sleep(5)
+            try:
+                WebDriverWait(dataf, 100).until(EC.presence_of_element_located((By.XPATH, '//li[@data-item-type="tweet"]')))
+            except:
+                print('Nothing to crawl')
+                break
         else:
-            print("nothing to crawl")
+            print("Done from last crawling")
             break;
     #        counter = counter + 1
     #        if counter == 2:
-            break
     dffinal.userid = pd.to_numeric(dffinal.userid, errors='coerce').fillna(0).astype(np.int64)    
     dffinal.tweetid = pd.to_numeric(dffinal.tweetid, errors='coerce').fillna(0).astype(np.int64)    
     dffinal = dffinal.append(datafin, ignore_index=True)
