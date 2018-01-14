@@ -69,7 +69,7 @@ def get_json(url,setname):
         except ValueError:
             print("json empty, tries : {}".format(jsontries))
             jsontries+=1
-            if jsontries >= 5:
+            if jsontries >= 100:
                 response = []
                 break
             else:
