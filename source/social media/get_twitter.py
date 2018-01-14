@@ -17,6 +17,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import *
 #from Crypto.Cipher import AES
 import base64
 import time
@@ -120,8 +121,8 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
                     break
                 else: 
                     self.dftemp = append_list_df(self.dftemp,dfrow)
-                self.first = self.first + 1
                 print("data number : {}".format(self.first))
+                self.first = self.first + 1
                 self.dftemp.userid = pd.to_numeric(self.dftemp.userid, errors='coerce').fillna(0).astype(np.int64)    
                 self.dftemp.tweetid = pd.to_numeric(self.dftemp.tweetid, errors='coerce').fillna(0).astype(np.int64)    
                 self.dftemp = self.dftemp.sort_values(by='tweetid', ascending=True)
@@ -136,8 +137,8 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
     #            print("dfrow = {}".format(dfrow['tweetid']))
                 self.dftemp = append_list_df(self.dftemp,dfrow)
             
-                self.first = self.first + 1
                 print("data number : {}".format(self.first))
+                self.first = self.first + 1
                 self.dftemp.userid = pd.to_numeric(self.dftemp.userid, errors='coerce').fillna(0).astype(np.int64)    
                 self.dftemp.tweetid = pd.to_numeric(self.dftemp.tweetid, errors='coerce').fillna(0).astype(np.int64)    
                 self.dftemp = self.dftemp.sort_values(by='tweetid', ascending=True)
@@ -272,7 +273,33 @@ def tweetcrawl(browser,outfileurl,tag):
         if not dataf.flagdone:
             datafin = dataf.scrape()
 
-            dataf.execute_script("window.scrollTo(0,0);")
+#            try:
+#                dataf.execute_script("""
+#                                        var list = document.getElementById("stream-items-id");
+#    
+#                                        while (list.firstChild) {
+#                                            //The list is LIVE so it will re-index each call
+#                                            list.removeChild(list.firstChild);
+#                                        }                     
+#                                     """
+#                                     )
+#                dataf.execute_script("window.scrollTo(0,0);")
+#                time.sleep(1)
+#                dataf.execute_script("window.scrollTo(0,document.body.scrollHeight/2);")
+#                time.sleep(1)
+#                dataf.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+#                WebDriverWait(dataf, 100).until(EC.presence_of_element_located((By.XPATH, '//li[@data-item-type="tweet"]')))
+#            except:
+#                dataf.execute_script("window.scrollTo(0,0);")
+#                time.sleep(1)
+#                dataf.execute_script("window.scrollTo(0,document.body.scrollHeight/2);")
+#                time.sleep(1)
+#                dataf.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+#                print('Nothing to crawl')
+#                break
+#            finally:                
+#                print(EC.presence_of_element_located((By.XPATH, '//li[@data-item-type="tweet"]')))                
+
             dataf.execute_script("""
                                     var list = document.getElementById("stream-items-id");
 
@@ -282,14 +309,36 @@ def tweetcrawl(browser,outfileurl,tag):
                                     }                     
                                  """
                                  )
-            dataf.execute_script("window.scrollTo(0,document.body.scrollHeight/2);")
-            dataf.execute_script("window.scrollTo(0,document.body.scrollHeight);")
-            time.sleep(5)
-            try:
-                WebDriverWait(dataf, 100).until(EC.presence_of_element_located((By.XPATH, '//li[@data-item-type="tweet"]')))
-            except:
-                print('Nothing to crawl')
-                break
+            tries = 0
+            while(True):
+
+                try:
+                    dataf.execute_script("window.scrollTo(0,0);")
+                    time.sleep(1)
+                    dataf.execute_script("window.scrollTo(0,document.body.scrollHeight/2);")
+                    time.sleep(1)
+                    dataf.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+                    print("tries = {}".format(tries))
+#                    if tries < 5:
+                    WebDriverWait(dataf, 5).until(EC.presence_of_element_located((By.XPATH, '//li[@data-item-type="tweet"]')))
+#                        if tries == 5 or tries == 0:
+#                            break
+                    print('pass webdriver wait')
+                    if tries == 100:
+                        dataf.flagdone = 1
+                        break
+                except TimeoutException:
+                    print('enter except')
+                    dataf.execute_script("window.scrollTo(0,0);")
+                    time.sleep(1)
+                    dataf.execute_script("window.scrollTo(0,document.body.scrollHeight/2);")
+                    time.sleep(1)
+                    dataf.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+                    tries = tries + 1
+                else:
+                    break
+
+
         else:
             print("Done from last crawling")
             break;
@@ -298,7 +347,7 @@ def tweetcrawl(browser,outfileurl,tag):
     dffinal.userid = pd.to_numeric(dffinal.userid, errors='coerce').fillna(0).astype(np.int64)    
     dffinal.tweetid = pd.to_numeric(dffinal.tweetid, errors='coerce').fillna(0).astype(np.int64)    
     dffinal = dffinal.append(datafin, ignore_index=True)
-    
+    dataf.close()
     return dffinal
 
     
