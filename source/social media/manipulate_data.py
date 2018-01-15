@@ -20,6 +20,7 @@ import time
 import requests
 import re
 
+
 sys.path.append(os.path.abspath("E:/RM/besoklibur/python/crawl/source/social media/"))
 from requests.exceptions import ConnectionError
 #from get_instagram_base import *
@@ -153,18 +154,21 @@ def append_list_df(df, lists):
     return df
 
 def get_first_row(df, keyword):
-    df_group = df.groupby('keyword').first()
-    df_group.reset_index(level=0, inplace=True)
-    dx = df_group[df_group['keyword'] == keyword]
-    return dx.iloc[0]
+    if df.empty:
+        return df
+    else:
+        df_group = df.groupby('keyword').first()
+        df_group.reset_index(level=0, inplace=True)
+        dx = df_group[df_group['keyword'] == keyword]
+        return dx.iloc[0]
 
 def get_last_row(df, keyword):
-    df_group = df.groupby('keyword').last()
-    df_group.reset_index(level=0, inplace=True)
-    dx = df_group[df_group['keyword'] == keyword]
-    if dx.empty:
-        return dx        
+    if df.empty:
+        return df
     else:
+        df_group = df.groupby('keyword').last()
+        df_group.reset_index(level=0, inplace=True)
+        dx = df_group[df_group['keyword'] == keyword]
         return dx.iloc[0]
 
 def crawl_stop(dfcrawl,dfpause,field,keyword):
