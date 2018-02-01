@@ -236,11 +236,11 @@ class myPage(webdriver.Firefox, webdriver.Chrome, webdriver.Ie):
             os.environ["webdriver.chrome.driver"] = chromedriver
             prefs = {"profile.managed_default_content_settings.images":2}
             options = Options()
-            options.add_argument("--disable-extensions")
-            options.add_argument("--disable-notifications")
-            options.add_argument("--headless")
-            options.add_argument("--disable-gpu")            
-            options.add_argument("--start-maximized");
+#            options.add_argument("--disable-extensions")
+#            options.add_argument("--disable-notifications")
+#            options.add_argument("--headless")
+#            options.add_argument("--disable-gpu")            
+#            options.add_argument("--start-maximized");
             options.add_experimental_option("prefs",prefs)
             self.dffinal = init_df(outfileurl,self.column)
 

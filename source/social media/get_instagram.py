@@ -39,8 +39,8 @@ id_fetchexplore = '17875800862117404'
 #}
 
 
-def visit_profile(userid):
-    url = 'https://www.instagram.com/' + userid + '/?__a=1'
+def visit_profile(username):
+    url = 'https://www.instagram.com/' + username + '/?__a=1'
     dftemp = pd.DataFrame()
     column = ['userid','username','followedby','following','mediacount','biography','url']
     dfrow = make_temp_df(column)
@@ -313,10 +313,21 @@ def get_comments(id_owner, code_post,count_comments,id_fetchcomment):
 def instacrawl(dffinal,tag):
     dfpause = get_last_row(dffinal,tag)
     dftemp = get_explore_post(dfpause,tag,id_fetchexplore,False,10)
-    dftemp = dftemp.sort_values(by='posttimestamp', ascending=True)
-    dffinal = dffinal.append(dftemp)
+    if not dftemp.empty:
+        dftemp = dftemp.sort_values(by='posttimestamp', ascending=True)
+        dffinal = dffinal.append(dftemp)
     return dffinal
 
+def instaprof(dffinal,tag):
+    dfprof = visit_profile(tag)
+    if not dfprof.empty:
+        if not crawl_exist(dffinal,'userid',dfrow['userid']):
+            dffinal = dffinal.append(dfprof)
+            return dffinal
+        else:
+            return dffinal
+    else:
+        return dfprof
 #opentrip5[opentrip5['linkpost']=="BcCgwzTDuqO"]
 #
 #post = visit_explore('opentrip')

@@ -177,4 +177,5 @@ options = {'crawl' : crawl,
            7 : prime,
 }
 if __name__ == '__main__':
+    print(os.path.dirname(os.path.realpath("__file__")))
     start_menu()
